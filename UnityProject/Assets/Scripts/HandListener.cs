@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 public class HandListener : RunAbleThread
 {
     public event Action<ELandMark, int, Vector3> onPointChange;
+    public event Action<ELandMark, Vector3, Vector3, Vector3> depthCalculation;
     private int count = 0;
 
     protected override void Run()
@@ -32,16 +33,25 @@ public class HandListener : RunAbleThread
                 if (gotMessage && message != "-1")
                 {
                     var landmarks = JsonConvert.DeserializeObject<Dictionary<string, Vector3[]>>(message);
+                    
                     var vectors = landmarks["right_hand"];
+                    if (vectors.Length > 0)
+                        depthCalculation.Invoke(ELandMark.RightHand, vectors[0], vectors[17], vectors[5]);
+
                     for (int i = 0; i < vectors.Length; i++)
                     {
                         onPointChange.Invoke(ELandMark.RightHand, i, vectors[i]);
                     }
+
                     vectors = landmarks["left_hand"];
+                    if (vectors.Length > 0)
+                        depthCalculation.Invoke(ELandMark.LeftHand, vectors[0], vectors[17], vectors[5]);
+                    
                     for (int i = 0; i < vectors.Length; i++)
                     {
                         onPointChange.Invoke(ELandMark.LeftHand, i, vectors[i]);
                     }
+
                     //vectors = landmarks["pose"];
                     //for (int i = 0; i < vectors.Length; i++)
                     //{
